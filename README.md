@@ -4,7 +4,7 @@ Labs, Homeworks, Exercises, Assignments for the March-April 2019 JS Applications
 * REST services. HTTP Requests. Guide to Firebase, Kinvey, Postman.
 * AJAX and jQuery AJAX. 
 * Asynchronous Programming.
-* JS for Front-End.
+* JS for Front-End. Boostrap.
 * Templating.
 * Routing and Architecture.
 * Workshop: Single-Page Application (SPA).

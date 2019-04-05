@@ -1,0 +1,8 @@
+{
+    "name": "JavaScript-Applications-SPA",
+    "version": "1.0.0",
+    "dependencies": {
+        "handlebars": "^4.1.1",
+        "mustache": "^3.0.1"
+    }
+}
