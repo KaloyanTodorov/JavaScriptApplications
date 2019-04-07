@@ -42,7 +42,7 @@ function app() {
         });
         
         try {
-            const req = await $.ajax({
+            await $.ajax({
                 method: "POST",
                 url: `${baserUrl}appdata/${appKey}/${countriesCollection}`,
                 headers,
@@ -94,10 +94,18 @@ function app() {
         }
     }
 
-    async function showTowns(e) {
-        const id = ($(e.target).parent().parent()[0]).id;
-        const country = $(`#${id} td:nth-child(2)>input`).val();
+    async function showTowns(countryId) {
+        let id;
+        if( typeof countryId === 'string') {
+            id = countryId;
+        } else {
+            id = ($(this).parent().parent()[0]).id;
+        }
 
+        const country = $(`#${id} td:nth-child(2)>input`).val();
+        
+        let divContainer = $(`#towns-${id}`);
+        divContainer.empty();
         try {
             const request = await $.ajax({
                 method: 'GET',
@@ -105,19 +113,120 @@ function app() {
                 headers
             });
 
-            let divContainer = $(`<div class="collapse-show" id="showTowns"></div>`);
             request
                 .filter(t => t.country === country)
                 .forEach(town => {
-                    const div = $(`<div class="card card-body">${town.name}</div>`);
-                    divContainer.append(div);
+                    const $townInput = $(`
+                    <div class="input-group input-group-sm mb-3 m-1">
+                        Town: <input class="m-2" id="town-${town._id}" value="${town.name}" />
+                    </div>`);
+
+                    const $editTownButton = $(`<button class="btn btn-warning m-1" id="edit-${town._id}">Edit</button>`);
+                    const $deleteTownButton = $(`<button class="btn btn-danger m-1" id="delete-${town._id}">Delete</button>`);
+
+                    $editTownButton.click(editTown);
+                    $deleteTownButton.click(deleteTown);
+                    
+                    divContainer
+                        .append($townInput
+                                .append($editTownButton)
+                                .append($deleteTownButton)
+                            );
                 });
             
                 $(`#${id} td:nth-child(2)`).append(divContainer);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        
 
-            
+    async function showTownInput() {
+        
+        const countryId = this.id.replace('add-town-', '');
+        showTowns(countryId);
+
+        const countries = await $.ajax({
+            method: 'GET',
+            url: baserUrl + 'appdata/' + appKey + '/' + countriesCollection,
+            headers
+        });
+
+        const country = countries.filter(c => c._id === countryId)[0].name;
+
+        const addTownInput = $(`<div>Add town: <input id="townId-${countryId}" type="text" placeholder="Add town" /></div>`);
+        const addTownButton = $(`<button class="btn btn-info">Add!</button>`);
+        addTownButton.click(addTown);
+
+        $(`#towns-${countryId}`)    
+            .prepend(addTownButton)
+            .prepend(addTownInput);
+
+        async function addTown() {
+            const townName = $(`#townId-${countryId}`).val();
+
+            const data = JSON.stringify({
+                country,
+                name: townName
+            });
+
+            try {
+                await $.ajax({
+                    method: 'POST',
+                    url: baserUrl + 'appdata/' + appKey + '/' + townsCollection,
+                    headers,
+                    data
+                });
+
+                showTowns(countryId);
+    
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        
+    }            
+
+    async function editTown() {
+        const id = this.id.replace('edit-', '');
+        const townName = $(this).parent()[0].children[0].value;
+        const countryName = $(this).parent().parent().parent()[0].children[0].value;
+        const countryId = $(this).parent().parent().parent().parent()[0].id;
+        
+        const data = JSON.stringify({
+            name: townName,
+            country: countryName
+        })
+        
+        try {
+            const request = await $.ajax({
+                method: 'PUT',
+                url: baserUrl + 'appdata/' + appKey + '/' + townsCollection + '/' + id,
+                headers,
+                data
+            });
+
+            console.log(request);
+            showTowns(countryId);
         } catch (error) {
-            console.log(error);
+            console.error(error)
+        }
+    }
+
+    async function deleteTown() {
+        const id = this.id.replace('delete-', '');
+        const countryId = $(this).parent().parent().parent().parent()[0].id;
+
+        try {
+            await $.ajax({
+                method: 'DELETE',
+                url: baserUrl + 'appdata/' + appKey + '/' + townsCollection + '/' + id,
+                headers
+            });
+
+            showTowns(countryId);
+        } catch (error) {
+            console.error(error);
         }
     }
 
@@ -140,60 +249,37 @@ function app() {
             let $country = $(`
             <tr id="${country._id}">
                 <td>${id + 1}</td>
-                <td><input type="text" value="${country.name}"></td>
+                <td>
+                    <input type="text" value="${country.name}">
+                    <div id="towns-${country._id}"></div>
+                </td>
             </tr>
             `)
             
             let $showTownsButton = $(`<button class="btn btn-info m-2" type="button">Show Towns</button>`);
-            let $editButton = $(`<button class="btn btn-warning m-2" type="button" data-toggle="modal" data-target="#${country._id}-modal">Edit</button>`);
-            let $deleteButton = $('<button class="btn btn-danger m-2">Delete</button>');
+            let $addTownButton = $(`<button class="btn btn-primary m-2" type="button" id="add-town-${country._id}">Add Town</button>`);
+            let $editButton = $(`<button class="btn btn-warning m-2" type="button" data-toggle="modal" data-target="#${country._id}-modal">Edit country</button>`);
+            let $deleteButton = $('<button class="btn btn-danger m-2">Delete country</button>');
 
             $showTownsButton.on('click', showTowns);
-            // $addTownButton.on('click', addTown);
+
+            $addTownButton.on('click', showTownInput);
 
             $editButton.on('click', editCountry);
             $deleteButton.on('click', deleteCountry);
 
-            let $modal = appendModal(country._id);
-
             $country
             .append($('<td>')
                 .append($showTownsButton)
+                .append($addTownButton)
                 .append($editButton)
                 .append($deleteButton));
 
             $($tbody).append($country);
-
-            $('#countries-div').append($modal);
         });
 
         $table.append($tbody);
 
         $countries.append($table);
-    }
-
-    function appendModal(id) {
-        return (
-            `<!-- Modal -->
-            <div id="${id}-modal" class="modal fade" role="dialog">
-              <div class="modal-dialog">
-            
-                <!-- Modal content-->
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Modal Header</h4>
-                  </div>
-                  <div class="modal-body">
-                    <p>Some text in the modal.</p>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                  </div>
-                </div>
-            
-              </div>
-            </div>
-            `)
     }
 }
