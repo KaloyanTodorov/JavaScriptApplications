@@ -1,0 +1,9 @@
+<h1>My contacts</h1>
+  
+<div class="contacts">
+{{#each contacts}}
+{{> contactInfo}}
+{{else}}
+    <p>No contacts found.</p>
+{{/each}}
+</div>
