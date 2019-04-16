@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>UniEnt</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.css" />
+  
+  <script src="./node_modules/jquery/dist/jquery.js"></script>
+  
+  <script src="./node_modules/bootstrap/dist/js/bootstrap.js"></script>
+  <script src="./node_modules/handlebars/dist/handlebars.min.js"></script>
+  <script src="./node_modules/sammy/lib/sammy.js"></script>
+  <script src="./node_modules/sammy/lib/plugins/sammy.handlebars.js"></script>
+  
+  <!-- services -->
+  <script src="./scripts/services/events-service.js"></script>
+  <script src="./scripts/services/user-service.js"></script>
+  
+  <!-- handlers -->
+  <script src="./scripts/handlers/home-handler.js"></script>
+  <script src="./scripts/handlers/user-handler.js"></script>
+  <script src="./scripts/handlers/events-handler.js"></script>
+  
+  <!-- app script -->
+  <script src="./scripts/kinvey.js"></script>
+  <script src="./scripts/notification.js"></script>
+  <script src="./scripts/app.js"></script>  
+
+</head>
+<body>
+
+  
+
+<div id="successBox" class="alert alert-success" role="alert"></div>
+<div id="loadingBox" class="alert alert-info" role="alert">Loading...</div>
+<div id="errorBox" class="alert alert-danger" role="alert"></div>
+
+  
+  <div id="root">
+  </div>
+  
+</body>
+</html>
